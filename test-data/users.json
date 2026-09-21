@@ -1,0 +1,8 @@
+{
+  "adminUser": {
+    "role": "Admin",
+    "status": "Enabled",
+    "password": "Test@123"
+  }
+}
+

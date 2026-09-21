@@ -1,0 +1,8 @@
+{
+  "employee": {
+    "firstName": "Lakshmi",
+    "middleName": "M",
+    "lastName": "Test",
+    "profilePicture": "test-data/profile.jpg"
+  }
+}
