@@ -321,3 +321,10 @@ If you use any part of this framework as a reference, kindly provide appropriate
 
 
 
+npx playwright test tests/Admin --project=chromium --headed
+
+npx playwright test tests/API --project=chromium --headed
+
+npx playwright test tests/Authentication --project=chromium --headed
+
+npx playwright test tests/Smoke --project=chromium --headed
