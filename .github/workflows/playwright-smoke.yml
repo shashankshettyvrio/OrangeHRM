@@ -15,9 +15,10 @@ jobs:
         browser: [chromium, firefox]
 
     env:
-      ORANGEHRM_BASE_URL: ${{ secrets.ORANGEHRM_BASE_URL }}
-      ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
-      ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
+      # FIX: added public demo-site fallbacks; when repo secrets are not configured they resolve to empty strings, global-setup fails on page.goto(undefined) and every run goes red.
+      ORANGEHRM_BASE_URL: ${{ secrets.ORANGEHRM_BASE_URL || 'https://opensource-demo.orangehrmlive.com' }}
+      ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME || 'Admin' }}
+      ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD || 'admin123' }}
 
     steps:
       - name: Checkout repository

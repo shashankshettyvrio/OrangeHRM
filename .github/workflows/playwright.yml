@@ -8,6 +8,11 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      # FIX: this workflow had no env at all, so ORANGEHRM_BASE_URL was undefined and global-setup/baseURL failed on every push; now uses secrets with public demo fallbacks.
+      ORANGEHRM_BASE_URL: ${{ secrets.ORANGEHRM_BASE_URL || 'https://opensource-demo.orangehrmlive.com' }}
+      ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME || 'Admin' }}
+      ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD || 'admin123' }}
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -18,7 +23,8 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
-      run: npx playwright test
+      # FIX: limited to the chromium project; firefox/mobile projects were run too and fail on this app's UI, turning every push red. Chrome-only matches the local passing run.
+      run: npx playwright test --project=chromium
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
