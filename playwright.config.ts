@@ -4,6 +4,8 @@ dotenv.config();
 
 export default defineConfig({
 
+  // FIX: raised per-test timeout from the 30s default to 90s; the public demo site is slow and the multi-step Add User flow (add employee + add user + search) legitimately exceeds 30s.
+  timeout: 90000,
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: false,

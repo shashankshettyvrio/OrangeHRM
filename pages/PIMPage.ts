@@ -15,6 +15,8 @@ export class PIMPage extends BasePage {
     }
 
     async navigateToPIM(): Promise<void> {
+        // FIX: expand the side menu on mobile viewports before clicking.
+        await this.openSideMenuIfCollapsed();
         await this.pimMenu.click();
     }
 

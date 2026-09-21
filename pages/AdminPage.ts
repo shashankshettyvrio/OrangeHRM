@@ -30,9 +30,11 @@ export class AdminPage extends BasePage {
 
     async navigateToAdmin(): Promise<void> 
     {
+        // FIX: expand the side menu on mobile viewports before clicking.
+        await this.openSideMenuIfCollapsed();
         await this.adminMenu.click();
         await expect(this.page).toHaveURL(/admin/);
-        await this.page.pause();
+        // FIX: removed page.pause(), which halts execution in headed mode.
     }
 
     async clickAddButton(): Promise<void> 

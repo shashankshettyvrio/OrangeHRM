@@ -3,6 +3,9 @@ import { LoginPage } from '../../pages/LoginPage';
 import { DashboardPage } from '../../pages/DashboardPage';
 import loginData from '../../test-data/login.json';
 
+// FIX: run without the shared logged-in storageState; otherwise the login page redirects to the dashboard and the username field never appears.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test('Login with valid credentials', async ({ page }) => {
 
     const loginPage = new LoginPage(page);

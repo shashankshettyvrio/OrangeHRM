@@ -10,7 +10,7 @@ async function globalSetup(config: FullConfig)
     const page = await browser.newPage();
     console.log('ORANGEHRM_BASE_URL:', process.env.ORANGEHRM_BASE_URL);
     console.log('ORANGEHRM_USERNAME:', process.env.ORANGEHRM_USERNAME);
-    console.log('ORANGEHRM_PASSWORD:', process.env.ORANGEHRM_PASSWORD);
+    // FIX: removed logging of the password to avoid leaking credentials in logs/CI output.
 
     await page.goto(process.env.ORANGEHRM_BASE_URL!);
     await page.getByPlaceholder('Username').fill(process.env.ORANGEHRM_USERNAME!);

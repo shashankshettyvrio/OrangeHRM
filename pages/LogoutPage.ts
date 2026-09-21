@@ -11,7 +11,7 @@ export class LogoutPage extends BasePage {
 
         super(page);
 
-        this.userDropdown = page.locator('.oxd-userdropdown-name');
+        this.userDropdown = page.locator('.oxd-userdropdown-tab'); // FIX: name label is hidden on mobile; the tab (avatar) is visible at every viewport
         this.logoutButton = page.getByRole('menuitem', { name: 'Logout' });
     }
 
