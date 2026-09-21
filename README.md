@@ -319,11 +319,5 @@ This project is created and maintained by **Lekshmi Mahadevan** as part of a per
 You are welcome to refer to this repository for learning and educational purposes. Please do not copy, republish, or claim this project as your own work without proper credit.
 If you use any part of this framework as a reference, kindly provide appropriate attribution to the original repository.
 
----
 
-## 👩‍💻 Author
 
-**Lekshmi Mahadevan**
-Automation QA Engineer
-
-**Skills:** Playwright · TypeScript · UI Automation · API Testing · Page Object Model · Test Automation Framework Development · GitHub Actions · CI/CD
