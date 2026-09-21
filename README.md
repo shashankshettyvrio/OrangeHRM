@@ -328,3 +328,66 @@ npx playwright test tests/API --project=chromium --headed
 npx playwright test tests/Authentication --project=chromium --headed
 
 npx playwright test tests/Smoke --project=chromium --headed
+
+Employee E2E workflow
+
+The file is tests/Employee E2E/addeditdeleteEmployee.spec.ts. It has one test, tagged @regression, that adds an employee, edits their job details, and deletes them. It uses the Page Object Model: the spec only calls page-object methods, and the locators live in pages/.
+
+Setup, before the test body runs
+
+1. Global setup (global-setup.ts) logs in once and saves the session to playwright/.auth/user.json.
+2. The chromium project loads that file as storageState. The test therefore starts already logged in, with no login steps.
+3. Fixtures (fixtures/fixtures.ts) create the page objects (pimPage, addEmployeePage, and so on) and inject them into the test.
+4. Test data:
+   - employee.json supplies Lakshmi / M / Test and the profile picture path.
+   - RandomGenerator.generateEmployeeId() produces a random 6-digit ID, so repeated runs don't collide on the unique Employee Id field.
+
+Step by step
+
+1. Open the dashboard
+
+- page.goto(Routes.DASHBOARD) goes to /web/index.php/dashboard/index. The relative path is resolved against baseURL.
+- dashboardPage.verifyDashboardLoaded() confirms the session is valid and the app is ready.
+
+2. Go to PIM, then Add Employee
+
+- pimPage.navigateToPIM() first calls openSideMenuIfCollapsed() in BasePage. It waits for the top bar and clicks the hamburger only if it is visible, which matters at mobile widths. It then clicks the "PIM" menu item.
+- pimPage.clickAddEmployee() clicks the "Add Employee" link.
+
+3. Add the employee (AddEmployeePage.addEmployee)
+
+It runs six sub-steps in order:
+- Fill first, middle and last name. Their locators are the input[name=...] attributes.
+- Clear and fill Employee Id. Its locator is the input group whose text starts with "Employee Id".
+- Upload the picture with setInputFiles on input[type=file], using test-data/profile.jpg.
+- Click Save, then wait 2 seconds for the navigation to settle.
+- verifyEmployeeCreated() asserts that the URL matches viewPersonalDetails and that the "Personal Details" heading is visible. This proves the record was created and the app redirected to the new employee's page.
+
+4. Edit job details (EmployeeDetailsPage.updateJobDetails)
+
+The test is still on the new employee's profile.
+- Click the Job tab.
+- Job Title: open the dropdown and pick option index 1. Index 0 is the "-- Select --" placeholder, so the code throws if there are 1 or fewer options. It logs the chosen text (this run picked "Account Assistant").
+- Employment Status: same approach (this run picked "Freelance").
+- Click Save (the first Save button on the page).
+- Assert that the toast contains "Successfully Updated".
+
+5. Delete the employee (DeleteEmployeePage.deleteEmployee("Lakshmi Test"))
+
+- navigateToEmployeeList: click the "Employee List" tab and wait for the viewEmployeeList URL.
+- searchEmployee: type the full name into the Employee Name box and click Search. That box is found with page.locator('input').nth(1).
+- selectEmployee: tick the first checkbox in the results.
+- clickDelete: click the trash-icon button. The bulk Delete button only appears once a row is selected.
+- confirmDelete: click "Yes, Delete" in the confirmation dialog.
+- verifyEmployeeDeleted: wait up to 10 seconds for a "Successfully Deleted" toast.
+
+Design notes and weak spots
+
+- Cleanup is part of the test. The employee created in step 3 is removed in step 5, so the shared demo site doesn't fill up. If the test fails between those steps, the employee is left behind.
+- The delete step is fragile.
+  - The name is always "Lakshmi Test". Leftover records from earlier failed runs would match too.
+  - .first() on the checkbox could then tick the wrong row, or the header "select all" box.
+  - input.nth(1) depends on DOM order.
+  - Safer options: use a unique name per run, as adduser.spec.ts does with generateEmployee(), or add a locator for the row containing the employee ID.
+- The 2-second waitForTimeout in clickSave is a fixed sleep. Waiting on the URL or a toast would be faster and more reliable.
+- Timing: the run takes about 20 seconds on the slow demo site, well inside the 90-second timeout I set.
