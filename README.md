@@ -1,5 +1,3 @@
-[![Playwright Smoke Tests](https://github.com/lekshmiBuilds/OrangeHRM/actions/workflows/playwright-smoke.yml/badge.svg?branch=feature/orangehrm_11Aug26)](https://github.com/lekshmiBuilds/OrangeHRM/actions/workflows/playwright-smoke.yml)
-
 # OrangeHRM Playwright Automation Framework
 
 ## 📌 Project Overview
