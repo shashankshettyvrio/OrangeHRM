@@ -1,43 +1,31 @@
 import { expect, Locator, Page } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { Routes } from '../constants/Routes';
 
 export class LogoutPage extends BasePage {
 
-    private readonly userDropdown: Locator;
-    private readonly logoutButton: Locator;
+    readonly userDropdown: Locator;
+    readonly logoutOption: Locator;
 
-    constructor(page: Page) 
-    {
-
+    constructor(page: Page) {
         super(page);
-
-        this.userDropdown = page.locator('.oxd-userdropdown-tab'); // FIX: name label is hidden on mobile; the tab (avatar) is visible at every viewport
-        this.logoutButton = page.getByRole('menuitem', { name: 'Logout' });
+        // The profile picture + name in the top right corner
+        this.userDropdown = page.locator('.oxd-userdropdown-tab');
+        this.logoutOption = page.getByRole('menuitem', { name: 'Logout' });
     }
 
-    async logout() 
-    {
-
+    async logout(): Promise<void> {
         await this.userDropdown.click();
-        await this.logoutButton.click();
-
+        await this.logoutOption.click();
     }
 
-    async verifyLogout() 
-    {
-
+    async verifyLoggedOut(): Promise<void> {
         await expect(this.page).toHaveURL(/auth\/login/);
-
     }
 
-    async verifySessionInvalidated() {
-
-        await this.page.goto(
-            'https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index'
-        );
-
+    // After logout, opening the dashboard must send us back to the login page
+    async verifyDashboardNotAccessible(): Promise<void> {
+        await this.page.goto(Routes.DASHBOARD);
         await expect(this.page).toHaveURL(/auth\/login/);
-
     }
-
 }

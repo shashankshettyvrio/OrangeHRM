@@ -6,3 +6,7 @@ allure-results/
 allure-report/
 
 node_modules/
+
+# Local secrets and the saved login session - never commit these
+.env
+playwright/.auth/

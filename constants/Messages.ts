@@ -1,7 +1,6 @@
-export const Messages = 
-{
+// Success messages (toasts) shown by OrangeHRM. Used in assertions.
+export const Messages = {
     SUCCESSFULLY_SAVED: 'Successfully Saved',
     SUCCESSFULLY_UPDATED: 'Successfully Updated',
-    SUCCESSFULLY_DELETED: 'Successfully Deleted',
-    NO_RECORDS_FOUND: 'No Records Found'
-} as const;
+    SUCCESSFULLY_DELETED: 'Successfully Deleted'
+};

@@ -1,19 +1,18 @@
-import { test, expect } from '../../fixtures/fixtures';
-import { OrangeHrmApiClient } from '../../api/OrangeHrmApiClient';
+import { test, expect } from '@playwright/test';
 import { Routes } from '../../constants/Routes';
 
-test('@regression Validate dashboard employee action summary API', async ({ page, dashboardPage }) => {
+// The "request" fixture sends API calls directly (no browser page).
+// It uses the same baseURL and the same logged-in cookies (storageState) as the UI tests.
+test('@regression Validate dashboard employee action summary API', async ({ request }) => {
 
-    await page.goto(Routes.DASHBOARD);
-    await dashboardPage.verifyDashboardLoaded();
+    const response = await request.get(Routes.DASHBOARD_ACTION_SUMMARY_API);
 
-    const orangeHrmApiClient = new OrangeHrmApiClient(page);
-    const response = await orangeHrmApiClient.getDashboardEmployeeActionSummary();
+    // Check the status code
+    expect(response.status()).toBe(200);
 
-    expect(response.status).toBe(200);
-    expect(response.body).toBeTruthy();
-    expect(response.body.data).toBeDefined();
-    expect(Array.isArray(response.body.data)).toBeTruthy();
-    expect(response.body.data.length).toBeGreaterThan(0);
+    // Check the JSON body: it must have a "data" list with at least one item
+    const body = await response.json();
+    expect(Array.isArray(body.data)).toBe(true);
+    expect(body.data.length).toBeGreaterThan(0);
 
 });

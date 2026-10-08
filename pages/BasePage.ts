@@ -1,30 +1,34 @@
 import { Page } from '@playwright/test';
 
-export class BasePage 
-{
+// Parent class for every page object.
+// It stores the Playwright "page" and holds code that many pages need.
+export class BasePage {
 
-    protected readonly page: Page;
+    readonly page: Page;
 
-    constructor(page: Page) 
-    {
+    constructor(page: Page) {
         this.page = page;
     }
 
-    async navigate(url: string): Promise<void> 
-    {
-        await this.page.goto(url);
+    // On small (mobile) screens the left side menu is hidden behind a "hamburger" icon.
+    // This opens the menu if that icon is shown. On desktop it does nothing.
+    async openSideMenuIfHidden(): Promise<void> {
+        await this.page.locator('.oxd-topbar-header').waitFor();
+
+        const hamburgerIcon = this.page.locator('.oxd-topbar-header-hamburger');
+        if (await hamburgerIcon.isVisible()) {
+            await hamburgerIcon.click();
+        }
     }
 
-    // FIX: on narrow (mobile) viewports the side menu is collapsed behind a hamburger button; open it so menu items become clickable.
-    async openSideMenuIfCollapsed(): Promise<void>
-    {
-        // FIX: '.oxd-main-menu' stays "visible" in the DOM while off-screen, so only the hamburger's visibility is used to detect a collapsed menu.
-        const toggle = this.page.locator('.oxd-topbar-header-hamburger') /* FIX: the hamburger is an <i> icon, not a <button> */;
-        // FIX: wait for the top bar to render first; isVisible() returns immediately, so the hamburger was skipped when the page had not loaded yet.
-        await this.page.locator('.oxd-topbar-header').waitFor({ state: 'visible' });
-        if (await toggle.isVisible())
-        {
-            await toggle.click();
+    // On small (mobile) screens the search filters above a table (Employee List, System Users)
+    // are folded away. This clicks the small arrow button to show them. On desktop it does nothing.
+    async openSearchFiltersIfHidden(): Promise<void> {
+        await this.page.locator('.oxd-table-filter').waitFor();
+
+        const searchButton = this.page.getByRole('button', { name: 'Search' });
+        if (!(await searchButton.isVisible())) {
+            await this.page.locator('.oxd-table-filter-header-options button').click();
         }
     }
 }

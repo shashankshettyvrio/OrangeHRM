@@ -1,70 +1,52 @@
 import { test as base, expect } from '@playwright/test';
-
+import { LoginPage } from '../pages/LoginPage';
 import { DashboardPage } from '../pages/DashboardPage';
+import { LogoutPage } from '../pages/LogoutPage';
 import { PIMPage } from '../pages/PIMPage';
-import { AdminPage } from '../pages/AdminPage';
-import { AddUserPage } from '../pages/AddUserPage';
 import { AddEmployeePage } from '../pages/AddEmployeePage';
 import { EmployeeDetailsPage } from '../pages/EmployeeDetailsPage';
-import { DeleteEmployeePage } from '../pages/DeleteEmployeePage';
-import { LoginPage } from '../pages/LoginPage';
-import { LogoutPage } from '../pages/LogoutPage';
+import { AdminPage } from '../pages/AdminPage';
+import { AddUserPage } from '../pages/AddUserPage';
 
-type MyFixtures = {
+// Fixtures create the page objects for us.
+// A test just asks for them by name, for example: async ({ loginPage, dashboardPage }) => { ... }
+// so we never have to write "new LoginPage(page)" inside a test.
+type Pages = {
+    loginPage: LoginPage;
     dashboardPage: DashboardPage;
+    logoutPage: LogoutPage;
     pimPage: PIMPage;
-    adminPage: AdminPage;
-    addUserPage: AddUserPage;
     addEmployeePage: AddEmployeePage;
     employeeDetailsPage: EmployeeDetailsPage;
-    deleteEmployeePage: DeleteEmployeePage;
-    loginPage: LoginPage;
-    logoutPage: LogoutPage;
-
-
+    adminPage: AdminPage;
+    addUserPage: AddUserPage;
 };
 
-export const test = base.extend<MyFixtures>({
-
-
-dashboardPage: async ({ page }, use) => {
-
-    await use(new DashboardPage(page));
-
-},
-
-    pimPage: async ({ page }, use) => {
-        await use(new PIMPage(page));
-    },
-
-    adminPage: async ({ page }, use) => {
-        await use(new AdminPage(page));
-    },
-
-    addUserPage: async ({ page }, use) => {
-        await use(new AddUserPage(page));
-    },
-
-    addEmployeePage: async ({ page }, use) => {
-        await use(new AddEmployeePage(page));
-    },
-
-    employeeDetailsPage: async ({ page }, use) => {
-        await use(new EmployeeDetailsPage(page));
-    },
-
-    deleteEmployeePage: async ({ page }, use) => {
-        await use(new DeleteEmployeePage(page));
-    },
-
+export const test = base.extend<Pages>({
     loginPage: async ({ page }, use) => {
         await use(new LoginPage(page));
     },
-
+    dashboardPage: async ({ page }, use) => {
+        await use(new DashboardPage(page));
+    },
     logoutPage: async ({ page }, use) => {
         await use(new LogoutPage(page));
+    },
+    pimPage: async ({ page }, use) => {
+        await use(new PIMPage(page));
+    },
+    addEmployeePage: async ({ page }, use) => {
+        await use(new AddEmployeePage(page));
+    },
+    employeeDetailsPage: async ({ page }, use) => {
+        await use(new EmployeeDetailsPage(page));
+    },
+    adminPage: async ({ page }, use) => {
+        await use(new AdminPage(page));
+    },
+    addUserPage: async ({ page }, use) => {
+        await use(new AddUserPage(page));
     }
-
 });
 
 export { expect };

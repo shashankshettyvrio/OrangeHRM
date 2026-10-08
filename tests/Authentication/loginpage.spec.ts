@@ -1,26 +1,13 @@
-import { test } from '@playwright/test';
-import { LoginPage } from '../../pages/LoginPage';
-import { DashboardPage } from '../../pages/DashboardPage';
-import loginData from '../../test-data/login.json';
+import { test } from '../../fixtures/fixtures';
 
-// FIX: run without the shared logged-in storageState; otherwise the login page redirects to the dashboard and the username field never appears.
+// Start this test LOGGED OUT (empty session), because we want to test the login page itself
 test.use({ storageState: { cookies: [], origins: [] } });
 
-test('Login with valid credentials', async ({ page }) => {
+test('@smoke Login with valid credentials', async ({ loginPage, dashboardPage }) => {
 
-    const loginPage = new LoginPage(page);
-    const dashboardPage = new DashboardPage(page);
+    await loginPage.open();
+    await loginPage.login(process.env.ORANGEHRM_USERNAME!, process.env.ORANGEHRM_PASSWORD!);
 
-    // Navigate to Login Page
-    await loginPage.navigateToLoginPage();
-
-    // Login with valid credentials
-    await loginPage.login(
-        loginData.admin.username,
-        loginData.admin.password
-    );
-
-    // Verify Dashboard is displayed
     await dashboardPage.verifyDashboardLoaded();
 
 });

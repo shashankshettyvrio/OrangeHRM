@@ -1,35 +1,33 @@
 import { test } from '../../fixtures/fixtures';
 import employeeData from '../../test-data/employee.json';
 import { RandomGenerator } from '../../utils/RandomGenerator';
-import { Routes } from '../../constants/Routes';
+import { Messages } from '../../constants/Messages';
 
-test(' @regression Add Employee, Edit Employee, Delete Employee', async ({
-    page,
-    dashboardPage,
-    pimPage,
-    addEmployeePage,
-    employeeDetailsPage,
-    deleteEmployeePage
-}) => {
+// End-to-end (E2E) flow: Add an employee -> Edit their job details -> Delete them
+test('@regression Add Employee, Edit Employee, Delete Employee', async ({ dashboardPage, pimPage, addEmployeePage, employeeDetailsPage }) => {
 
-    //utils
+    // A unique id lets us find exactly this employee again when deleting
     const employeeId = RandomGenerator.generateEmployeeId();
-    
-    await page.goto(Routes.DASHBOARD);
-    await dashboardPage.verifyDashboardLoaded();
-    await pimPage.navigateToPIM();
-    await pimPage.clickAddEmployee();
-    await addEmployeePage.addEmployee(
-        employeeData.employee.firstName,
-        employeeData.employee.middleName,
-        employeeData.employee.lastName,
-        employeeId,
-        employeeData.employee.profilePicture
-    );
+    const employee = employeeData.employee;
 
-    await employeeDetailsPage.updateJobDetails();
-    await deleteEmployeePage.deleteEmployee(
-        `${employeeData.employee.firstName} ${employeeData.employee.lastName}`
-    );
+    // Step 1: ADD the employee
+    await dashboardPage.open();
+    await pimPage.openPIM();
+    await pimPage.clickAddEmployee();
+    await addEmployeePage.addEmployee(employee.firstName, employee.middleName, employee.lastName, employeeId, employee.profilePicture);
+    await addEmployeePage.verifyEmployeeCreated();
+
+    // Step 2: EDIT the employee's job details
+    await employeeDetailsPage.openJobTab();
+    await employeeDetailsPage.selectFirstJobTitle();
+    await employeeDetailsPage.selectFirstEmploymentStatus();
+    await employeeDetailsPage.clickSave();
+    await employeeDetailsPage.verifyJobDetailsUpdated();
+
+    // Step 3: DELETE the employee (also cleans up our test data)
+    await pimPage.openPIM();
+    await pimPage.searchByEmployeeId(employeeId);
+    await pimPage.deleteEmployee(employeeId);
+    await pimPage.verifyToastMessage(Messages.SUCCESSFULLY_DELETED);
 
 });

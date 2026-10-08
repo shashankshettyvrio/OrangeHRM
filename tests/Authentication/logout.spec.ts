@@ -1,26 +1,21 @@
-import { test } from '@playwright/test';
-import { DashboardPage } from '../../pages/DashboardPage';
-import { LogoutPage } from '../../pages/LogoutPage';
-// FIX: import LoginPage and login data so this test uses its own session.
-import { LoginPage } from '../../pages/LoginPage';
-import loginData from '../../test-data/login.json';
+import { test } from '../../fixtures/fixtures';
 
-// FIX: use a fresh session; logging out with the shared storageState invalidated it server-side and broke later tests (Smoke, Employee E2E).
+// Use a fresh session for this test. If we logged out of the SHARED session,
+// every test that runs after this one would no longer be logged in.
 test.use({ storageState: { cookies: [], origins: [] } });
 
-test('Logout', async ({ page }) => {
+test('@smoke Logout', async ({ loginPage, dashboardPage, logoutPage }) => {
 
-    const dashboardPage = new DashboardPage(page);
-    const logoutPage = new LogoutPage(page);
-
-    // FIX: log in with a dedicated session instead of relying on the shared one.
-    const loginPage = new LoginPage(page);
-    await loginPage.navigateToLoginPage();
-    await loginPage.login(loginData.admin.username, loginData.admin.password);
-
+    // Step 1: log in
+    await loginPage.open();
+    await loginPage.login(process.env.ORANGEHRM_USERNAME!, process.env.ORANGEHRM_PASSWORD!);
     await dashboardPage.verifyDashboardLoaded();
+
+    // Step 2: log out
     await logoutPage.logout();
-    await logoutPage.verifyLogout();
-    await logoutPage.verifySessionInvalidated();
+    await logoutPage.verifyLoggedOut();
+
+    // Step 3: the dashboard must not open any more without logging in again
+    await logoutPage.verifyDashboardNotAccessible();
 
 });

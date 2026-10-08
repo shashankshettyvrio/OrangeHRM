@@ -1,12 +1,9 @@
 import { test } from '../../fixtures/fixtures';
-import { Routes } from '../../constants/Routes';
 
-test('@smoke Verify Dashboard Loads', async ({ page, dashboardPage }) => 
-    
-    {
+// We are already logged in (global-setup.ts + storageState)
+test('@smoke Verify Dashboard Loads', async ({ dashboardPage }) => {
 
-    await page.goto(Routes.DASHBOARD);
-
+    await dashboardPage.open();
     await dashboardPage.verifyDashboardLoaded();
 
 });

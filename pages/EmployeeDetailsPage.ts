@@ -1,109 +1,48 @@
 import { expect, Locator, Page } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { Messages } from '../constants/Messages';
 
+// The employee profile page (Personal Details, Job, ... tabs)
 export class EmployeeDetailsPage extends BasePage {
 
-    private readonly jobTab: Locator;
-    private readonly jobTitleDropdown: Locator;
-    private readonly employmentStatusDropdown: Locator;
-    private readonly saveButton: Locator;
-    private readonly successToast: Locator;
+    readonly jobTab: Locator;
+    readonly jobTitleDropdown: Locator;
+    readonly employmentStatusDropdown: Locator;
+    readonly dropdownOptions: Locator;
+    readonly saveButton: Locator;
+    readonly toastMessage: Locator;
 
     constructor(page: Page) {
-
         super(page);
-
         this.jobTab = page.getByRole('link', { name: 'Job' });
-
-        // Job Title dropdown
-        this.jobTitleDropdown = page
-            .locator('label:text("Job Title")')
-            .locator('../..')
-            .locator('.oxd-select-text');
-
-        // Employment Status dropdown
-        this.employmentStatusDropdown = page
-            .locator('label:text("Employment Status")')
-            .locator('../..')
-            .locator('.oxd-select-text');
-
-        // Save button
+        this.jobTitleDropdown = page.locator('.oxd-input-group').filter({ hasText: 'Job Title' }).locator('.oxd-select-text');
+        this.employmentStatusDropdown = page.locator('.oxd-input-group').filter({ hasText: 'Employment Status' }).locator('.oxd-select-text');
+        this.dropdownOptions = page.getByRole('option');
         this.saveButton = page.getByRole('button', { name: 'Save' }).first();
-
-        // Success toast
-        this.successToast = page.locator('.oxd-toast');
+        this.toastMessage = page.locator('.oxd-toast');
     }
 
-    async clickJobTab(): Promise<void> {
-
+    async openJobTab(): Promise<void> {
         await this.jobTab.click();
-
+        await expect(this.page).toHaveURL(/viewJobDetails/);
     }
 
-    async selectJobTitle(): Promise<void> {
-
+    // Option 0 is "-- Select --", so we pick option 1 (the first real value)
+    async selectFirstJobTitle(): Promise<void> {
         await this.jobTitleDropdown.click();
-
-        const options = this.page.locator('.oxd-select-dropdown > *');
-
-        const count = await options.count();
-
-        if (count <= 1) {
-            throw new Error('No Job Title options found.');
-        }
-
-        const selectedJobTitle = await options.nth(1).textContent();
-
-        console.log('Selected Job Title:', selectedJobTitle);
-
-        await options.nth(1).click();
-
+        await this.dropdownOptions.nth(1).click();
     }
 
-    async selectEmploymentStatus(): Promise<void> {
-
+    async selectFirstEmploymentStatus(): Promise<void> {
         await this.employmentStatusDropdown.click();
-
-        const options = this.page.locator('.oxd-select-dropdown > *');
-
-        const count = await options.count();
-
-        if (count <= 1) {
-            throw new Error('No Employment Status options found.');
-        }
-
-        const selectedStatus = await options.nth(1).textContent();
-
-        console.log('Selected Employment Status:', selectedStatus);
-
-        await options.nth(1).click();
-
+        await this.dropdownOptions.nth(1).click();
     }
 
     async clickSave(): Promise<void> {
-
         await this.saveButton.click();
-
     }
 
-    async verifyJobUpdated(): Promise<void> {
-
-        await expect(this.successToast).toContainText('Successfully Updated');
-
+    async verifyJobDetailsUpdated(): Promise<void> {
+        await expect(this.toastMessage).toContainText(Messages.SUCCESSFULLY_UPDATED);
     }
-
-    async updateJobDetails(): Promise<void> {
-
-        await this.clickJobTab();
-
-        await this.selectJobTitle();
-
-        await this.selectEmploymentStatus();
-
-        await this.clickSave();
-
-        await this.verifyJobUpdated();
-
-    }
-
 }

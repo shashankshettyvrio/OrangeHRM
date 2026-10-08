@@ -1,82 +1,36 @@
 import { test, expect } from '@playwright/test';
 
-test('API CRUD - POST GET PUT', async ({ request }) => {
+// API practice test against a free public fake API (jsonplaceholder).
+// It shows the 4 CRUD methods: POST (create), GET (read), PUT (update), DELETE (delete).
+const API_URL = 'https://jsonplaceholder.typicode.com/posts';
 
-    // -----------------------------
-    // POST - Create Resource
-    // -----------------------------
+test('API CRUD - POST GET PUT DELETE', async ({ request }) => {
 
-    const postResponse = await request.post(
-        'https://jsonplaceholder.typicode.com/posts',
-        {
-            data: {
-                title: 'OrangeHRM API Automation',
-                body: 'Created using Playwright API',
-                userId: 1
-            }
-        }
-    );
-
+    // POST - create a new post
+    const postResponse = await request.post(API_URL, {
+        data: { title: 'OrangeHRM API Automation', body: 'Created using Playwright API', userId: 1 }
+    });
     expect(postResponse.status()).toBe(201);
-    const postBody = await postResponse.json();
-    console.log('POST Response:', postBody);
-    expect(postBody.title).toBe('OrangeHRM API Automation');
-    expect(postBody.body).toBe('Created using Playwright API');
-    expect(postBody.userId).toBe(1);
-    expect(postBody.id).toBeDefined();
-    const postId = postBody.id;
-    console.log('Created Post ID:', postId);
+    const createdPost = await postResponse.json();
+    expect(createdPost.title).toBe('OrangeHRM API Automation');
+    expect(createdPost.id).toBeDefined();
 
-
-    // -----------------------------
-    // GET - Read Existing Resource
-    // -----------------------------
-
-    const getResponse = await request.get(
-        'https://jsonplaceholder.typicode.com/posts/1'
-    );
-
+    // GET - read post number 1
+    const getResponse = await request.get(API_URL + '/1');
     expect(getResponse.status()).toBe(200);
-    const getBody = await getResponse.json();
-    console.log('GET Response:', getBody);
-    expect(getBody.id).toBe(1);
-    expect(getBody.userId).toBeDefined();
-    expect(getBody.title).toBeDefined();
-    expect(getBody.body).toBeDefined();
+    const post = await getResponse.json();
+    expect(post.id).toBe(1);
 
+    // PUT - update post number 1
+    const putResponse = await request.put(API_URL + '/1', {
+        data: { id: 1, title: 'Updated OrangeHRM API Automation', body: 'Updated using Playwright API', userId: 1 }
+    });
+    expect(putResponse.status()).toBe(200);
+    const updatedPost = await putResponse.json();
+    expect(updatedPost.title).toBe('Updated OrangeHRM API Automation');
 
-    // -----------------------------
-    // PUT - Update Existing Resource
-    // -----------------------------
-
-    const updateResponse = await request.put(
-        'https://jsonplaceholder.typicode.com/posts/1',
-        {
-            data: {
-                id: 1,
-                title: 'Updated OrangeHRM API Automation',
-                body: 'Updated using Playwright API',
-                userId: 1
-            }
-        }
-    );
-
-    expect(updateResponse.status()).toBe(200);
-    const updateBody = await updateResponse.json();
-    console.log('PUT Response:', updateBody);
-    expect(updateBody.id).toBe(1);
-    expect(updateBody.title).toBe('Updated OrangeHRM API Automation');
-    expect(updateBody.body).toBe('Updated using Playwright API');
-    expect(updateBody.userId).toBe(1);
-
-// -----------------------------
-// DELETE - Delete Resource
-// -----------------------------
-
-const deleteResponse = await request.delete('https://jsonplaceholder.typicode.com/posts/1');
-expect(deleteResponse.status()).toBe(200);
-const deleteBody = await deleteResponse.json();
-console.log('DELETE Response:', deleteBody);
-
+    // DELETE - delete post number 1
+    const deleteResponse = await request.delete(API_URL + '/1');
+    expect(deleteResponse.status()).toBe(200);
 
 });

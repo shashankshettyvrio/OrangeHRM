@@ -1,33 +1,49 @@
 name: Playwright Tests
+
+# When does this workflow run?
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]       # every push to main
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]       # every pull request into main
+  workflow_dispatch:         # "Run workflow" button in the GitHub Actions tab
+
 jobs:
   test:
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest   # a fresh Linux machine from GitHub
+    timeout-minutes: 30
+
+    # Environment variables for the tests (on CI there is no .env file).
+    # Values come from GitHub Secrets; if a secret is not set, the public demo values are used.
     env:
-      # FIX: this workflow had no env at all, so ORANGEHRM_BASE_URL was undefined and global-setup/baseURL failed on every push; now uses secrets with public demo fallbacks.
       ORANGEHRM_BASE_URL: ${{ secrets.ORANGEHRM_BASE_URL || 'https://opensource-demo.orangehrmlive.com' }}
       ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME || 'Admin' }}
       ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD || 'admin123' }}
+
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      # FIX: limited to the chromium project; firefox/mobile projects were run too and fail on this app's UI, turning every push red. Chrome-only matches the local passing run.
-      run: npx playwright test --project=chromium
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      - name: Checkout the code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install the Chromium browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests on Chromium
+        run: npx playwright test --project=chromium
+
+      # Upload the HTML report so it can be downloaded from the workflow run page (even if tests fail)
+      - name: Upload HTML report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

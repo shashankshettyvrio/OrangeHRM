@@ -1,27 +1,26 @@
-import { chromium, FullConfig } from '@playwright/test';
+import { chromium } from '@playwright/test';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
-async function globalSetup(config: FullConfig) 
+// Runs ONCE before all tests (see globalSetup in playwright.config.ts).
+// It logs in and saves the cookies to playwright/.auth/user.json,
+// so every test can start already logged in (storageState).
+async function globalSetup() {
 
-{
-    console.log('========== GLOBAL SETUP STARTED ==========');
-    const browser = await chromium.launch({headless: process.env.CI ? true : false});
+    const browser = await chromium.launch();
     const page = await browser.newPage();
-    console.log('ORANGEHRM_BASE_URL:', process.env.ORANGEHRM_BASE_URL);
-    console.log('ORANGEHRM_USERNAME:', process.env.ORANGEHRM_USERNAME);
-    // FIX: removed logging of the password to avoid leaking credentials in logs/CI output.
 
-    await page.goto(process.env.ORANGEHRM_BASE_URL!);
+    await page.goto(process.env.ORANGEHRM_BASE_URL + '/web/index.php/auth/login');
     await page.getByPlaceholder('Username').fill(process.env.ORANGEHRM_USERNAME!);
     await page.getByPlaceholder('Password').fill(process.env.ORANGEHRM_PASSWORD!);
-    
     await page.getByRole('button', { name: 'Login' }).click();
     await page.waitForURL('**/dashboard/index');
-    await page.context().storageState({path: 'playwright/.auth/user.json'});
-    console.log('Storage state saved successfully.');
+
+    // Save the logged-in session
+    await page.context().storageState({ path: 'playwright/.auth/user.json' });
+
     await browser.close();
-    console.log('========== GLOBAL SETUP FINISHED ==========');
 }
 
 export default globalSetup;
